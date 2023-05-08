@@ -33,6 +33,8 @@ mkdir projects/ghidra
 mkdir projects/hackthebox
 mkdir projects/python
 mkdir projects/rust
+mkdir projects/rust/binaries
+mkdir projects/rust/libraries
 mkdir projects/tauri
 mkdir projects/tryhackme
 mkdir projects/virtualbox
@@ -43,8 +45,27 @@ packages=($(<installed_packages.txt))
 sudo pacman -S --needed --noconfirm "${packages[@]}"
 
 echo "Building packages from git repos ..."
+cd ~/repos
+git clone https://aur.archlinux.org/yay-git.git
+cd yay-git
+makepkg -sri
+cd ..
+yay -S brave-bin
+git clone https://github.com/pwndbg/pwndbg
+cd pwndbg
+./setup.sh
+cd ..
+curl https://sh.rustup.rs -sSf | sh
+source "$HOME/.cargo/env"
+git clone https://aur.archlinux.org/python310.git
+cd python310
+makepkg -si
+cd ..
+
 
 echo "Moving configuration files into place ..."
+mv ./configs/.bashrc ~/.bashrc
+mv ./configs/.vimrc ~/.vimrc
 mv ./configs/alacritty ~/.config/
 mv ./configs/dconf ~/.config/
 mv ./configs/i3 ~/.config/
