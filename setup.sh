@@ -21,28 +21,33 @@ rm -r ~/Music
 rm -r ~/Templates
 rm -r ~/Videos
 rm -r ~/Desktop
-mv Documents documents
-mv Downloads downloads
-mv Pictures pictures
-mkdir projects
-mkdir repos
-mkdir projects/arch_linux
-mkdir projects/bash
-mkdir projects/CC++
-mkdir projects/ghidra
-mkdir projects/hackthebox
-mkdir projects/python
-mkdir projects/rust
-mkdir projects/rust/binaries
-mkdir projects/rust/libraries
-mkdir projects/tauri
-mkdir projects/tryhackme
-mkdir projects/virtualbox
-mkdir projects/x86_64
+mv ~/Documents ~/documents
+mv ~/Downloads ~/downloads
+mv ~/Pictures ~/pictures
+mkdir ~/pictures/backgrounds
+cp ./resources/background1.jpg ~/pictures/backgrounds 
+mkdir ~/projects
+mkdir ~/repos
+mkdir ~/projects/arch_linux
+mkdir ~/projects/bash
+mkdir ~/projects/CC++
+mkdir ~/projects/ghidra
+mkdir ~/projects/hackthebox
+mkdir ~/projects/python
+mkdir ~/projects/rust
+mkdir ~/projects/rust/binaries
+mkdir ~/projects/rust/libraries
+mkdir ~/projects/tauri
+mkdir ~/projects/tryhackme
+mkdir ~/projects/virtualbox
+mkdir ~/projects/x86_64
 
 echo "Installing packages from installed_packages.txt..."
 packages=($(<installed_packages.txt))
 sudo pacman -S --needed --noconfirm "${packages[@]}"
+
+echo "Enabling lightdm ..."
+sudo systemctl enable lightdm
 
 echo "Building packages from git repos ..."
 cd ~/repos
@@ -61,18 +66,22 @@ git clone https://aur.archlinux.org/python310.git
 cd python310
 makepkg -si
 cd ..
-
+git clone https://aur.archlinux.org/marktext.git
+cd marktext
+makepkg -si
+cd ..
 
 echo "Moving configuration files into place ..."
-mv ./configs/.bashrc ~/.bashrc
-mv ./configs/.vimrc ~/.vimrc
-mv ./configs/alacritty ~/.config/
-mv ./configs/dconf ~/.config/
-mv ./configs/i3 ~/.config/
-mv ./configs/nitrogen ~/.config/
-mv ./configs/picom ~/.config/
-mv ./configs/polybar ~/.config/
-mv ./configs/ranger ~/.config/
-mv ./configs/rofi ~/.config/
-mv ./configs/zathura ~/.config/
+cp ./configs/.bashrc ~/.bashrc
+cp ./configs/.vimrc ~/.vimrc
+cp -r ./configs/alacritty ~/.config/
+cp -r ./configs/dconf ~/.config/
+cp -r ./configs/i3 ~/.config/
+cp -r ./configs/marktext ~/.config/
+cp -r ./configs/nitrogen ~/.config/
+cp -r ./configs/picom ~/.config/
+cp -r ./configs/polybar ~/.config/
+cp -r ./configs/ranger ~/.config/
+cp -r ./configs/rofi ~/.config/
+cp -r ./configs/zathura ~/.config/
 
