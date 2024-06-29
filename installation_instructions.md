@@ -68,7 +68,7 @@ sha256sum archlinux-2024.06.01-x86_64.iso
 
 ### Creating Bootable USB
 
-### Installation
+# 
 
 1. Insert the USB drive you intend to boot from.
 
