@@ -82,7 +82,7 @@ sudo umount /dev/<device name>
 
 4. In a terminal, navigate to the directory containing the ISO file.
 
-5. Write the ISO to the USB drive
+5. Write the ISO to the USB drive - **Do not include partition number**.
 
 ```bash
 sudo dd bs=4M if=archlinux-2024.06.01-x86_64.iso of=/dev/<device name> status=progress oflag=sync
@@ -100,17 +100,35 @@ sudo eject /dev/<device name>
 
 ###### Connecting to WiFi
 
-After booting up from the ISO, we will first connect to WiFi. To do this, we will use [iwd](https://wiki.archlinux.org/title/Iwd). Run the following command to start *iwd*:`iwctl`. Then to list the wireless devices available, run `device list`. Next, we need to scan the networks available to us. To do this, run 
-
-`station [device name] scan`
-
-Next, to get the list of networks scanned run
-
-`station [device name] get-networks`
-
-To connect to a given network, run
-
-`station [device name] connect [network name]`
+After booting up from the ISO, we will first connect to WiFi. 
+1. Start `iwd` with
+```bash
+iwctl
+```
+2. List the wireless interfaces with
+```bash
+device list
+```
+3. Scan the available networks with
+```bash
+station [device name] scan
+```
+4. List the available networks found in scan
+```bash
+station [device name] get-networks
+```
+5. Connect to the desired network
+```bash
+station [device name] connect [network name]
+```
+6. Exit with
+```bash
+exit
+```
+7. Test connectivity with
+```bash
+ping google.com
+```
 
 --- 
 
@@ -118,7 +136,7 @@ To connect to a given network, run
 
 After confirming an internet connection, we need to syncronize the network time protocol (NTP). To do this we will run
 
-`timedatectl set-ntp tue`
+`timedatectl set-ntp true`
 
 Now we need to use [Reflector](https://wiki.archlinux.org/title/reflector) to update our mirror list. This package comes pre-installed in the Arch Linux ISO. We will run 
 
@@ -132,27 +150,69 @@ Next we will update by running
 
 ###### Creating Disk Partitions
 
-We will run `lsblk` to list the disks. After identifying the disk to partition (generally it is the one with the most storage), we will run `gdisk /dev/[disk name]`.  Once this comes up, we will press `n` for new, then press `Enter` for the first two lines, then type `+260M` in the *Last Sector* field. 
-
-We will change this to an [EFI type filesystem](https://en.wikipedia.org//wiki/EFI_system_partition) by typing `ef00`.  
-
-Next we will create our [swap partition](https://opensource.com/article/18/9/swap-space-linux-systems) by typing `n` for new, then pressing `Enter` for the first two lines. Next, when setting the size of the partition, it should be twice the size of the RAM. Type `+[partition size]G`. Next, on the last line type `8200` to set the type as *SWAP*. 
-
-Finally, to create our root partition, we type `n`  for new, then `Enter` for the next four lines. To write the changes to the disk, type `w`, then `Y` to accept the changes.
-
-To confirm these changes, we will type `lsblk` again to look at the disks. 
-
-Now we need to format the partitions. We will type 
-
-`mkfs.fat -F32 /dev/[first partition name]`
-
-Now to make the *SWAP* on the second partition, we type 
-
-`mkswap /dev/[second partition name]`
-
-and activate it by typing 
-
-`swapon /dev/[second partition name]`
+1. List the block devices with
+```bash
+lsblk
+``` 
+2. After identifying the target partition (usually the one with largest capacity)
+```bash
+gdisk /dev/[disk name]
+```
+3. Delete old partitions (Repeat for each partition)
+```bash
+d
+```
+4. Create new EFI partition
+```bash
+n
+```
+5. Press `Enter` twice
+6. Set the size of the partition
+```bash
++260M
+``` 
+7. Set the partition type to EFI
+```bash
+ef00
+```
+8. Create new swap partition
+```bash
+n
+```
+9. Press `Enter` twice
+10. Set the size of the partition
+```bash
++16G
+```
+11. Set the partition type to Linux swap
+```bash
+8200
+```
+12. Create root partition
+```bash
+n
+```
+13. Press `Enter` four times.
+14. Write the changes
+```bash
+w
+```
+15. Confirm new partitions by listing block devices
+```bash
+lsblk
+```
+16. Format the EFI partition
+```bash
+mkfs.fat -F32 /dev/[first partition name]
+```
+17. Format the swap partition
+```bash
+mkswap /dev/[second partition name]
+```
+18. Activate the swap partition
+```bash
+swapon /dev/[second partition name]
+```
 
 ###### Encrypting the Root Partition
 
