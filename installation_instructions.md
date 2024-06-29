@@ -2,31 +2,99 @@
 
 ---
 
+#### Release Info
+
+- Current Release: 2024.06.01
+
+- Included Kernel: 6.9.3
+  
+  
+
+### Pre-Requisites
+
+Before following the instructions below, there are several tools we will need. Make sure the following things are installed:
+
+- transmission-gtk
+
+- gnugpg
+  
+  
+
 ### Acquiring the ISO image
 
-The recommended way to [download](https://archlinux.org/download/) the Arch Linux ISO is to use a torrent client. In the event you do not have a torrent client already installed, run the following command
 
-`sudo pacman -S transmission-gtk`
 
-After the install finishes, you should be able to launch the program. Once the program is open, select *Open* at the top left-hand corner and open your downloaded torrent file. 
+**Verifying Signature**
 
-Once the download completes, right-click the file and select *Open Folder*. This should bring you to the location the new ISO was placed.
+1. Download the [PGP signature](https://archlinux.org/iso/2024.06.01/archlinux-2024.06.01-x86_64.iso.sig) for the ISO image.
 
-We now want to verify its signature. To do this, we need GnuPG installed. In the event, it is not already installed, run the following command
+2. Open a terminal and navigate to the location of the PGP signature.
 
-`sudo pacman -S gnupg`
+3. Verify the signature file
 
-Next we will need the [ISO PGP signature](https://archlinux.org/iso/2022.11.01/archlinux-2022.11.01-x86_64.iso.sig). We will now verify its signature with the following command from within the directory the .SIG file was downloaded
+```bash
+gpg --keyserver-options auto-key-retrieve --verify archlinux-2024.06.01-x86_64.iso.sig
+```
 
-`gpg --keyserver-options auto-key-retrieve --verify archlinux-*version*-x86_64.iso.sig`
+4. If the signature is valid, you should see a message stating "Good signature from ..."
+   
+   
 
-As one final check of the ISO's integrity, you can check its SHA256 hash by running 
+**Downloading the ISO**
 
-`sha256sum archlinux-*version*-x86_64.iso`
+1. Download the [torrent file](https://archlinux.org/releng/releases/2024.06.01/torrent/) associated with the newest ISO image.
 
-and comparing the output of that to the listed SHA256 hash in the **checksum** section of the [Downloads](https://archlinux.org/download/#checksums) page. 
+2. Launch `transmission-gtk`.
+
+3. Click *Open* and select the downloaded torrent file.
+
+4. After the download is complete, *Right-Click > Open Folder*
+
+5. Note the location of the ISO file.
+
+6. Open a terminal and navigate to the location of the ISO file.
+
+7. Compute the SHA256 hash of the ISO file with 
+
+```bash
+sha256sum archlinux-2024.06.01-x86_64.iso
+```
+
+8. Compare the output of the above command to the [official hash value](https://archlinux.org/iso/2024.06.01/sha256sums.txt).
+
+9. If the hashes match, proceed.
+
+
+
+### Creating Bootable USB
 
 ### Installation
+
+1. Insert the USB drive you intend to boot from.
+
+2. Run `lsblk` to list all connected disks and identify the device name of your drive.
+
+3. Unmount the USB drive if it is mounted
+
+```bash
+sudo umount /dev/<device name>
+```
+
+4. In a terminal, navigate to the directory containing the ISO file.
+
+5. Write the ISO to the USB drive
+
+```bash
+sudo dd bs=4M if=archlinux-2024.06.01-x86_64.iso of=/dev/<device name> status=progress oflag=sync
+```
+
+6. Run `sync` to ensure all pending writes are completed.
+
+7. Eject the USB
+
+```bash
+sudo eject /dev/<device name>
+```
 
 ---
 
