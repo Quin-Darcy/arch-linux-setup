@@ -2,12 +2,11 @@ alacritty
 alsa-utils
 base
 base-devel
-brave-bin
+code
 dialog
 dosfstools
 efibootmgr
 gdb
-ghidra
 git
 gnu-netcat
 grub
@@ -26,9 +25,7 @@ mtools
 network-manager-applet
 networkmanager
 nitrogen
-nmap
 noto-fonts
-openvpn
 papirus-icon-theme
 pcmanfm
 picom
@@ -38,12 +35,9 @@ radare2
 ranger
 reflector
 rofi
-traceroute
 ttf-dejavu
 ttf-liberation
 vim
-virtualbox
-wireshark-qt
 xdg-user-dirs
 xdg-utils
 xf86-video-intel
