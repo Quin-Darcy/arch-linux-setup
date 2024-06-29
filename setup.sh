@@ -1,87 +1,96 @@
 #!/bin/bash
 
-echo "Syncronizing hardware clock ..."
-sudo timedatectl set-ntp true
-sudo hwclock --systohc
+set -e  # Exit immediately if a command exits with a non-zero status.
 
-echo "Updating mirrorlist ..."
-sudo reflector -c US -a 6 --save /etc/pacman.d/mirrorlist
+echo "Starting post-installation setup..."
 
-echo "Refreshing package database ..."
-sudo pacman -Syy
+function sync_time {
+    echo "Synchronizing hardware clock..."
+    sudo timedatectl set-ntp true
+    sudo hwclock --systohc
+}
 
-echo "Updating system ..."
-sudo pachman -Syu --noconfirm
+function update_mirrorlist {
+    echo "Updating mirrorlist..."
+    sudo reflector -c US -a 6 --save /etc/pacman.d/mirrorlist
+}
 
-echo "Enabling reflector timer service ..."
-sudo systemctl enable --now reflector.timer
+function refresh_packages {
+    echo "Refreshing package database..."
+    sudo pacman -Syy
 
-echo "Cleaning up home directory ..."
-rm -r ~/Music
-rm -r ~/Templates
-rm -r ~/Videos
-rm -r ~/Desktop
-mv ~/Documents ~/documents
-mv ~/Downloads ~/downloads
-mv ~/Pictures ~/pictures
-mkdir ~/pictures/backgrounds
-cp ./resources/background1.jpg ~/pictures/backgrounds 
-mkdir ~/projects
-mkdir ~/repos
-mkdir ~/projects/arch_linux
-mkdir ~/projects/bash
-mkdir ~/projects/CC++
-mkdir ~/projects/ghidra
-mkdir ~/projects/hackthebox
-mkdir ~/projects/python
-mkdir ~/projects/rust
-mkdir ~/projects/rust/binaries
-mkdir ~/projects/rust/libraries
-mkdir ~/projects/tauri
-mkdir ~/projects/tryhackme
-mkdir ~/projects/virtualbox
-mkdir ~/projects/x86_64
+    echo "Updating system..."
+    sudo pacman -Syu --noconfirm
 
-echo "Installing packages from installed_packages.txt..."
-packages=($(<installed_packages.txt))
-sudo pacman -S --needed --noconfirm "${packages[@]}"
+    echo "Enabling reflector timer service ..."
+    sudo systemctl enable --now reflector.timer
+}
 
-echo "Enabling lightdm ..."
-sudo systemctl enable lightdm
+function setup_directories {
+    echo "Cleaning up and reorganizing home directory..."
+    for dir in Music Templates Videos Desktop; do
+        [[ -d "$HOME/$dir" ]] && rm -r "$HOME/$dir"
+    done
 
-echo "Building packages from git repos ..."
-cd ~/repos
-git clone https://aur.archlinux.org/yay-git.git
-cd yay-git
-makepkg -sri
-cd ..
-yay -S brave-bin
-git clone https://github.com/pwndbg/pwndbg
-cd pwndbg
-./setup.sh
-cd ..
-curl https://sh.rustup.rs -sSf | sh
-source "$HOME/.cargo/env"
-git clone https://aur.archlinux.org/python310.git
-cd python310
-makepkg -si
-cd ..
-git clone https://aur.archlinux.org/marktext.git
-cd marktext
-makepkg -si
-cd ..
+    mv "$HOME/Documents" "$HOME/documents"
+    mv "$HOME/Downloads" "$HOME/downloads"
+    mv "$HOME/Pictures" "$HOME/pictures"
 
-echo "Moving configuration files into place ..."
-cp ./configs/.bashrc ~/.bashrc
-cp ./configs/.vimrc ~/.vimrc
-cp -r ./configs/alacritty ~/.config/
-cp -r ./configs/dconf ~/.config/
-cp -r ./configs/i3 ~/.config/
-cp -r ./configs/marktext ~/.config/
-cp -r ./configs/nitrogen ~/.config/
-cp -r ./configs/picom ~/.config/
-cp -r ./configs/polybar ~/.config/
-cp -r ./configs/ranger ~/.config/
-cp -r ./configs/rofi ~/.config/
-cp -r ./configs/zathura ~/.config/
+    cp ./resources/background1.jpg "$HOME/pictures/backgrounds"
+
+    mkdir -p "$HOME/projects" {"$HOME/projects"/{arch_linux,bash,C,ghidra,hackthebox,python,rust/{binaries,libraries,tests},tauri,tryhackme,virtualbox,x86_64}}
+}
+
+function install_packages {
+    echo "Installing packages from installed_packages.txt..."
+    packages=($(<installed_packages.txt))
+    sudo pacman -S --needed --noconfirm "${packages[@]}"
+}
+
+function enable_lightdm {
+    echo "Enabling lightdm ..."
+    sudo systemctl enable lightdm
+}
+
+function get_repos {
+    echo "Building packages from git repos ..."
+
+    mkdir "$HOME/repos"
+    cd "$HOME/repos"
+    git clone https://aur.archlinux.org/yay-git.git
+    cd yay-git
+    makepkg -sri
+    cd ..
+
+    yay -S brave-bin
+
+    mkdir -p "$HOME/repos/rust"
+    cd "$HOME/repos/rust"
+    curl https://sh.rustup.rs -sSf | sh
+    source "$HOME/.cargo/env"
+    cd "$HOME"
+
+    cd "$HOME/repos"
+    git clone https://aur.archlinux.org/marktext.git
+    cd marktext
+    makepkg -si
+    cd "$HOME"
+}
+
+function configure_system {
+    echo "Moving configuration files into place..."
+    declare -A configs=( [".bashrc"]="$HOME" [".vimrc"]="$HOME" ["alacritty"]="~/.config" ["dconf"]="~/.config" ["i3"]="~/.config" ["marktext"]="~/.config" ["nitrogen"]="~/.config" ["picom"]="~/.config" ["polybar"]="~/.config" ["ranger"]="~/.config" ["rofi"]="~/.config" ["zathura"]="~/.config")
+    for config in "${!configs[@]}"; do
+        cp -r "./configs/$config" "${configs[$config]}"
+    done
+}
+
+sync_time
+update_mirrorlist
+refresh_packages
+setup_directories
+install_packages
+configure_system
+
+echo "Post-installation setup completed successfully."
 

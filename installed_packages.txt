@@ -33,6 +33,7 @@ papirus-icon-theme
 pcmanfm
 picom
 polybar
+python
 radare2
 ranger
 reflector
@@ -92,5 +93,4 @@ xorg-xwayland
 xorg-xwd
 xorg-xwininfo
 xorg-xwud
-yay-git
 zathura
